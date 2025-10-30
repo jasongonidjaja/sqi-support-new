@@ -1,6 +1,6 @@
 export default {
   up: async (queryInterface) => {
-    await queryInterface.bulkInsert("SupportTypes", [
+    await queryInterface.bulkInsert("support_types", [
       { name: "Support Review Code UAT"},
       { name: "Support Rollout Pod UAT / Regresi"},
       { name: "Support Re-base Gitlab UAT / Regresi"},

@@ -1,6 +1,6 @@
 export default {
   up: async (queryInterface) => {
-    await queryInterface.bulkInsert("Applications", [
+    await queryInterface.bulkInsert("applications", [
       { name: "OASE" },
       { name: "B24" },
       { name: "ALMOND" },

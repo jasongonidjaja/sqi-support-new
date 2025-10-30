@@ -1,10 +1,9 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable("SupportTypes", {
+  await queryInterface.createTable("support_types", {
     id: {
       type: Sequelize.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
+      primaryKey: true,
     },
     name: {
       type: Sequelize.STRING,

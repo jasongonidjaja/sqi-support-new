@@ -1,15 +1,18 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/database.js"; // sesuaikan dengan path file koneksi database kamu
+import sequelize from "../config/database.js";
 
 const Application = sequelize.define("Application", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  owner: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
+}, {
+  tableName: "applications",
 });
 
 export default Application;

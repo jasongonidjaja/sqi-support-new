@@ -1,14 +1,24 @@
-const Task = require('./Task');
-const Application = require('./Application');
-const SupportType = require('./SupportType');
+// src/models/index.js
+import Task from "./Task.js";
+import Application from "./Application.js";
+import SupportType from "./SupportType.js";
+import SQIPic from "./SQIPic.js";
+import User from "./User.js";
 
+// Relasi Application ↔ Task
+Application.hasMany(Task, { foreignKey: "applicationId", as: "tasks" });
+Task.belongsTo(Application, { foreignKey: "applicationId", as: "application" });
 
-Application.hasMany(Task, { foreignKey: 'application_id' });
-Task.belongsTo(Application, { foreignKey: 'application_id' });
+// Relasi SupportType ↔ Task
+SupportType.hasMany(Task, { foreignKey: "supportTypeId", as: "tasks" });
+Task.belongsTo(SupportType, { foreignKey: "supportTypeId", as: "supportType" });
 
+// Relasi SQIPic ↔ Task
+SQIPic.hasMany(Task, { foreignKey: "sqiPicId", as: "tasks" });
+Task.belongsTo(SQIPic, { foreignKey: "sqiPicId", as: "sqiPic" });
 
-SupportType.hasMany(Task, { foreignKey: 'support_type_id' });
-Task.belongsTo(SupportType, { foreignKey: 'support_type_id' });
+// Relasi User ↔ Task
+User.hasMany(Task, { foreignKey: "createdByUserId", as: "createdTasks" });
+Task.belongsTo(User, { foreignKey: "createdByUserId", as: "createdBy" });
 
-
-module.exports = { Task, Application, SupportType };
+export { Task, Application, SupportType, SQIPic, User };

@@ -1,11 +1,10 @@
 export default {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Applications", {
+    await queryInterface.createTable("applications", {
       id: {
-        allowNull: false,
+        type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
       },
       name: {
         type: Sequelize.STRING,

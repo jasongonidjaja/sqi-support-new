@@ -1,14 +1,14 @@
 export async function up(queryInterface) {
-  await queryInterface.bulkInsert("Users", [
+  await queryInterface.bulkInsert("users", [
     {
-      username: "admin_sqi",
-      password: "admin123",  // Mudah, plain text password
+      username: "sqi1",
+      password: "sqi123",  // Mudah, plain text password
       role: "sqi",
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
-      username: "developer_user",
+      username: "developer1",
       password: "dev123",  // Mudah, plain text password
       role: "developer",
       createdAt: new Date(),

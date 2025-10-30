@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Tasks", {
+    await queryInterface.createTable("tasks", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: "SupportTypes",
+          model: "support_types",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -40,7 +40,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Applications",
+          model: "applications",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -52,12 +52,25 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "SQIPics",
+          model: "sqi_pics",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
+
+      // 🔹 User yang membuat task
+      createdByUserId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+
 
       // 🔹 Timestamps
       createdAt: {
@@ -70,6 +83,10 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.fn("NOW"),
       },
+
+    }, {
+      // ⬇️ Tambahkan ini di SINI, setelah definisi kolom
+      engine: "InnoDB", // ✅ supaya tabel support foreign key
     });
   },
 

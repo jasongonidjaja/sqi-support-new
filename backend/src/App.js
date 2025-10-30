@@ -1,10 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import taskRoutes from "./routes/tasks.js";
 import supportTypeRoutes from "./routes/supportTypes.js";
 import sqiPicRoutes from "./routes/sqiPics.js"; // ✅ pakai import, bukan require
 import sequelize from "./config/database.js";   // ✅ tambahkan ini untuk koneksi DB
 import applicationRoutes from "./routes/applications.js";
+import authRoutes from "./routes/auth.js";
+import taskRoutes from "./routes/tasks.js";
 
 dotenv.config();
 
@@ -32,11 +33,14 @@ app.use("/api/support-types", supportTypeRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/sqi-pics", sqiPicRoutes); // ✅ ganti require → import
 
+app.use("/api/auth", authRoutes);
+
+
 // Jalankan server
 const PORT = process.env.PORT || 4000;
 
 sequelize
-  .sync({ alter: true })
+  .sync({ })
   .then(() => {
     console.log("Database connected and synced");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

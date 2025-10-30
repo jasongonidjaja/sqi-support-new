@@ -2,6 +2,11 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   username: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -15,15 +20,11 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      isIn: [["sqi", "developer"]], // Role hanya bisa 'sqi' atau 'developer'
+      isIn: [["sqi", "developer"]],
     },
   },
+}, {
+  tableName: "users",
 });
-
-// Hapus hashing password sebelum menyimpannya
-// User.beforeCreate(async (user) => {
-//   const hashedPassword = await bcrypt.hash(user.password, 10);
-//   user.password = hashedPassword;
-// });
 
 export default User;

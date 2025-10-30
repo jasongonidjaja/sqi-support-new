@@ -4,8 +4,14 @@ import sequelize from "../config/database.js";
 import Application from "./Application.js";
 import SQIPic from "./SQIPic.js";
 import SupportType from "./SupportType.js";
+import User from "./User.js";
 
 const Task = sequelize.define("Task", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true, // ✅ pastikan Task juga punya PK
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -18,18 +24,46 @@ const Task = sequelize.define("Task", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  applicationId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: "applications", // ✅ huruf kecil, sesuai nama tabel
+      key: "id",
+    },
+  },
   supportTypeId: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: "SupportTypes",
+      model: "support_types", // ✅ pastikan sesuai nama tabel
       key: "id",
     },
   },
+  sqiPicId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: "sqi_pics",
+      key: "id",
+    },
+  },
+  createdByUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "users",
+      key: "id",
+    },
+  },
+}, {
+  tableName: "tasks",
+  timestamps: true,
 });
 
 Task.belongsTo(Application, { foreignKey: "applicationId", as: "application" });
 Task.belongsTo(SQIPic, { foreignKey: "sqiPicId", as: "sqiPic" });
 Task.belongsTo(SupportType, { foreignKey: "supportTypeId", as: "supportType" });
+Task.belongsTo(User, { foreignKey: "createdByUserId", as: "createdBy" });
 
 export default Task;

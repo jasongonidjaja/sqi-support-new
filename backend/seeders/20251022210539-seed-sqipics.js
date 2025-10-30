@@ -1,6 +1,6 @@
 export default {
   up: async (queryInterface) => {
-    await queryInterface.bulkInsert("SqiPics", [
+    await queryInterface.bulkInsert("Sqi_pics", [
       { name: "MDA" },
       { name: "FTH" },
       { name: "JSK" },

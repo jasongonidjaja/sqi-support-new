@@ -2,11 +2,11 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable("users", {
       id: {
         type: Sequelize.INTEGER,
-        primaryKey: true,
         autoIncrement: true,
+        primaryKey: true,
       },
       username: {
         type: Sequelize.STRING,
@@ -21,7 +21,9 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          isIn: [["sqi", "developer"]],
+          isIn: [
+            ["sqi", "developer"]
+          ],
         },
       },
       createdAt: {
