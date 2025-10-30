@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";  // Import multer
 import {
   authenticate,
   authorize
@@ -8,7 +9,19 @@ import Application from "../models/Application.js";
 import SQIPic from "../models/SQIPic.js";
 import SupportType from "../models/SupportType.js";
 import User from "../models/User.js";
+import TaskStatus from "../constants/taskStatus.js";
 
+// Konfigurasi multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Tentukan folder penyimpanan file
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname); // Tentukan nama file
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -40,7 +53,10 @@ router.get("/", authenticate, authorize("sqi", "developer"), async (req, res) =>
     res.status(200).json({
       message: "Berhasil mengambil data task.",
       count: tasks.length,
-      data: tasks,
+      data: tasks.map(task => ({
+        ...task.toJSON(),
+        status: task.status, // Pastikan status ada di response
+      })),
     });
   } catch (err) {
     console.error("❌ Error fetching tasks:", err);
@@ -48,13 +64,23 @@ router.get("/", authenticate, authorize("sqi", "developer"), async (req, res) =>
   }
 });
 
+// Dapatkan semua PIC SQI
+router.get("/sqi-pics", authenticate, authorize("sqi"), async (req, res) => {
+  try {
+    const sqiPics = await SQIPic.findAll({ attributes: ["id", "name"] });
+    res.json(sqiPics);
+  } catch (err) {
+    console.error("❌ Error fetching SQI PICs:", err);
+    res.status(500).json({ error: "Gagal mengambil daftar PIC SQI" });
+  }
+});
 
 /**
  * ===============================
  * 👨‍💻 Developer: Membuat task baru
  * ===============================
  */
-router.post("/", authenticate, authorize("developer"), async (req, res) => {
+router.post("/", authenticate, authorize("developer"), upload.single("attachment"), async (req, res) => {
   try {
     const {
       title,
@@ -63,10 +89,14 @@ router.post("/", authenticate, authorize("developer"), async (req, res) => {
       customSupportType,
       applicationId,
       sqiPicId,
+      status = TaskStatus.PENDING, // Default ke 'pending' jika tidak ada status yang diberikan
     } = req.body;
 
+    // Dapatkan path file upload
+      const attachmentPath = req.file ? req.file.path.replace(/\\/g, "/") : null;
+
     // Validasi input
-    if (!title || !description || !applicationId || !sqiPicId) {
+    if (!title || !description || !applicationId) {
       return res.status(400).json({
         error: "Field wajib tidak boleh kosong: title, description, applicationId, sqiPicId.",
       });
@@ -90,9 +120,12 @@ router.post("/", authenticate, authorize("developer"), async (req, res) => {
       supportTypeId,
       customSupportType: supportType === "Other" ? customSupportType : null,
       applicationId,
-      sqiPicId,
+      sqiPicId: sqiPicId || null,
       createdByUserId: req.user.userId, // 🔹 user login dari JWT
+      attachment: attachmentPath, // Menyimpan path file
+      status, // Menambahkan status di sini
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
 
@@ -160,5 +193,98 @@ router.get("/:id", authenticate, authorize("sqi", "developer"), async (req, res)
     });
   }
 });
+
+// src/routes/task.js
+router.put("/:id", authenticate, authorize("sqi"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Pastikan status yang diberikan valid
+    const validStatuses = ["pending", "in_progress", "completed", "approved", "rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: "Status yang diberikan tidak valid. Status harus salah satu dari: pending, in_progress, completed, approved, rejected."
+      });
+    }
+
+    // Cari task berdasarkan ID
+    const task = await Task.findByPk(id);
+    if (!task) {
+      return res.status(404).json({
+        error: "Task tidak ditemukan."
+      });
+    }
+
+    // Update status task
+    task.status = status;
+    await task.save();
+
+    res.status(200).json({
+      message: `Task status berhasil diubah menjadi ${status}.`,
+      data: task,
+    });
+  } catch (err) {
+    console.error("❌ Error updating task:", err);
+    res.status(500).json({
+      error: "Gagal mengubah status task.",
+      details: err.message,
+    });
+  }
+});
+
+// SQI (admin) assign PIC SQI ke task
+router.put("/:id/assign", authenticate, authorize("sqi"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { sqi_pic_id } = req.body;
+
+    if (!sqi_pic_id) {
+      return res.status(400).json({ error: "Harap sertakan ID PIC SQI yang akan di-assign." });
+    }
+
+    // 🔍 Cari task
+    const task = await Task.findByPk(id);
+    if (!task) {
+      return res.status(404).json({ error: "Task tidak ditemukan." });
+    }
+
+    // 🔍 Cari PIC SQI dari tabel sqi_pics
+    const sqiPic = await SQIPic.findByPk(sqi_pic_id);
+    if (!sqiPic) {
+      return res.status(404).json({ error: "PIC SQI tidak ditemukan di database sqi_pics." });
+    }
+
+    // 🟢 Assign ke kolom model yang benar
+    task.sqiPicId = sqi_pic_id;
+
+    // ⚙️ Ubah status otomatis jika masih "pending"
+    if (task.status === "pending") {
+      task.status = "in_progress";
+    }
+
+    await task.save();
+
+    // (Opsional) Ambil ulang dengan relasi lengkap
+    const updatedTask = await Task.findByPk(id, {
+      include: [
+        { model: SQIPic, as: "sqiPic", attributes: ["id", "name"] },
+        { model: User, as: "createdBy", attributes: ["id", "username", "role"] },
+      ],
+    });
+
+    res.status(200).json({
+      message: `✅ Task berhasil di-assign ke PIC SQI: ${sqiPic.name}, status otomatis menjadi "${task.status}".`,
+      data: updatedTask,
+    });
+  } catch (err) {
+    console.error("❌ Error assigning PIC SQI:", err);
+    res.status(500).json({
+      error: "Gagal assign PIC SQI.",
+      details: err.message,
+    });
+  }
+});
+
 
 export default router;

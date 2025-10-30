@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import dotenv from "dotenv";
 import supportTypeRoutes from "./routes/supportTypes.js";
 import sqiPicRoutes from "./routes/sqiPics.js"; // ✅ pakai import, bukan require
@@ -11,6 +12,9 @@ dotenv.config();
 
 const app = express();
 import cors from "cors";
+
+// setelah inisialisasi app
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use(
   cors({

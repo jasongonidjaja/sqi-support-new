@@ -11,10 +11,6 @@ const SQIPic = sequelize.define("SQIPic", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-//   email: {
-//     type: DataTypes.STRING,
-//     allowNull: true,
-//   },
 }, {
   tableName: "sqi_pics",
 });

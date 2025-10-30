@@ -56,6 +56,17 @@ const Task = sequelize.define("Task", {
       key: "id",
     },
   },
+
+  attachment: {
+    type: DataTypes.STRING, // Menyimpan path file
+    allowNull: true, // Kolom attachment bisa kosong
+  },
+
+  status: {
+    type: DataTypes.ENUM("pending", "in_progress", "completed", "approved", "rejected"),
+    allowNull: false,
+    defaultValue: "pending",
+  },
 }, {
   tableName: "tasks",
   timestamps: true,

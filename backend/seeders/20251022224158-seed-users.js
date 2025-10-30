@@ -8,7 +8,21 @@ export async function up(queryInterface) {
       updatedAt: new Date(),
     },
     {
+      username: "sqi2",
+      password: "sqi123",  // Mudah, plain text password
+      role: "sqi",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
       username: "developer1",
+      password: "dev123",  // Mudah, plain text password
+      role: "developer",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      username: "developer2",
       password: "dev123",  // Mudah, plain text password
       role: "developer",
       createdAt: new Date(),

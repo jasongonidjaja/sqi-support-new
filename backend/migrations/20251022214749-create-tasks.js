@@ -50,13 +50,13 @@ module.exports = {
       // 🔹 PIC SQI yang bertanggung jawab
       sqiPicId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "sqi_pics",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
       },
 
       // 🔹 User yang membuat task
@@ -71,6 +71,24 @@ module.exports = {
         onDelete: "CASCADE",
       },
 
+      // 🔹 Kolom attachment untuk menyimpan file path
+      attachment: {
+        type: Sequelize.STRING, // Menyimpan path file
+        allowNull: true, // Bisa null saat tidak ada file
+      },
+
+      // 🔹 Status task
+      status: {
+        type: Sequelize.ENUM(
+          "pending", 
+          "in_progress", 
+          "completed", 
+          "approved", 
+          "rejected"
+        ),
+        allowNull: false,
+        defaultValue: "pending", // Set default ke "pending"
+      },
 
       // 🔹 Timestamps
       createdAt: {
