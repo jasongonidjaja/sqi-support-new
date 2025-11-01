@@ -7,6 +7,7 @@ import sequelize from "./config/database.js";   // ✅ tambahkan ini untuk konek
 import applicationRoutes from "./routes/applications.js";
 import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/tasks.js";
+import deploymentRequestRoutes from "./routes/deploymentRequests.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/support-types", supportTypeRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/sqi-pics", sqiPicRoutes); // ✅ ganti require → import
+app.use("/api/deployment-requests", deploymentRequestRoutes);
 
 app.use("/api/auth", authRoutes);
 

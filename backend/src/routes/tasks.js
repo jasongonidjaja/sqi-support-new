@@ -10,6 +10,7 @@ import SQIPic from "../models/SQIPic.js";
 import SupportType from "../models/SupportType.js";
 import User from "../models/User.js";
 import TaskStatus from "../constants/taskStatus.js";
+import TaskLog from "../models/TaskLog.js";
 
 // Konfigurasi multer
 const storage = multer.diskStorage({
@@ -128,6 +129,14 @@ router.post("/", authenticate, authorize("developer"), upload.single("attachment
       updatedAt: new Date(),
     });
 
+        // 🧾 Simpan log aktivitas
+    await TaskLog.create({
+      taskId: newTask.id,
+      action: "Task Created",
+      oldValue: null,
+      newValue: status,
+      userId: req.user.userId,
+    });
 
     res.status(201).json({
       message: "✅ Task berhasil dibuat.",
@@ -194,7 +203,7 @@ router.get("/:id", authenticate, authorize("sqi", "developer"), async (req, res)
   }
 });
 
-// src/routes/task.js
+// src/routes/task.js -> update task status
 router.put("/:id", authenticate, authorize("sqi"), async (req, res) => {
   try {
     const { id } = req.params;
@@ -216,9 +225,22 @@ router.put("/:id", authenticate, authorize("sqi"), async (req, res) => {
       });
     }
 
+    // Simpan nilai lama status
+    const oldStatus = task.status;
+    console.log(oldStatus)
+
     // Update status task
     task.status = status;
     await task.save();
+
+    // Simpan log aktivitas status berubah
+    await TaskLog.create({
+      taskId: task.id,
+      action: "Status Change",
+      oldValue: oldStatus,
+      newValue: status,
+      userId: req.user.userId,
+    });
 
     res.status(200).json({
       message: `Task status berhasil diubah menjadi ${status}.`,
@@ -249,6 +271,9 @@ router.put("/:id/assign", authenticate, authorize("sqi"), async (req, res) => {
       return res.status(404).json({ error: "Task tidak ditemukan." });
     }
 
+    // Simpan nilai lama PIC SQI
+    const oldPic = task.sqiPicId;
+
     // 🔍 Cari PIC SQI dari tabel sqi_pics
     const sqiPic = await SQIPic.findByPk(sqi_pic_id);
     if (!sqiPic) {
@@ -264,6 +289,15 @@ router.put("/:id/assign", authenticate, authorize("sqi"), async (req, res) => {
     }
 
     await task.save();
+
+    // Simpan log aktivitas assign PIC SQI
+    await TaskLog.create({
+      taskId: task.id,
+      action: "PIC Assigned",
+      oldValue: oldPic ? `PIC ID: ${oldPic}` : "None", // Old PIC (atau 'None' jika belum ada)
+      newValue: `PIC ID: ${sqi_pic_id}`, // New PIC
+      userId: req.user.userId,
+    });
 
     // (Opsional) Ambil ulang dengan relasi lengkap
     const updatedTask = await Task.findByPk(id, {

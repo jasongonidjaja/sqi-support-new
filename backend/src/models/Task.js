@@ -5,6 +5,7 @@ import Application from "./Application.js";
 import SQIPic from "./SQIPic.js";
 import SupportType from "./SupportType.js";
 import User from "./User.js";
+import TaskLog from "./TaskLog.js";
 
 const Task = sequelize.define("Task", {
   id: {
@@ -76,5 +77,7 @@ Task.belongsTo(Application, { foreignKey: "applicationId", as: "application" });
 Task.belongsTo(SQIPic, { foreignKey: "sqiPicId", as: "sqiPic" });
 Task.belongsTo(SupportType, { foreignKey: "supportTypeId", as: "supportType" });
 Task.belongsTo(User, { foreignKey: "createdByUserId", as: "createdBy" });
+Task.hasMany(TaskLog, { foreignKey: "taskId" });
+
 
 export default Task;

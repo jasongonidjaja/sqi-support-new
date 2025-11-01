@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
+import TaskLog from "./TaskLog.js";
 
 const User = sequelize.define("User", {
   id: {
@@ -26,5 +27,7 @@ const User = sequelize.define("User", {
 }, {
   tableName: "users",
 });
+
+User.hasMany(TaskLog, { foreignKey: "userId" });
 
 export default User;
